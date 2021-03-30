@@ -1,0 +1,13 @@
+#!/bin/bash
+
+yum install -y
+yum install httpd -y
+systemctl status httpd
+systemctl start httpd
+systemctl status httpd
+chmod -R 777 /var/www/html
+cd /var/www/html
+wget https://27d41bfcae37f8c731354031036a26e4ae344d1e@raw.githubusercontent.com/MEmrahTekin/project1/master/index.html
+wget https://27d41bfcae37f8c731354031036a26e4ae344d1e@raw.githubusercontent.com/MEmrahTekin/project1/master/cat0.jpg
+wget https://27d41bfcae37f8c731354031036a26e4ae344d1e@raw.githubusercontent.com/MEmrahTekin/project1/master/cat1.jpg
+wget https://27d41bfcae37f8c731354031036a26e4ae344d1e@raw.githubusercontent.com/MEmrahTekin/project1/master/cat2.jpg

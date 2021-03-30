@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "AWS CloudFormation Sample Template LAMP_Single_Instance: ..."
+Parameters: {}
+Mappings: {}
+Resources:
+  WebServerInstance:
+    Type: AWS::EC2::Instance
+    Metadata: {}
+    Properties:
+      ImageId:
+        Fn::FindInMap:
+          - AWSRegionArch2AMI
+          - Ref: AWS::Region
+          - Fn::FindInMap:
+              - AWSInstanceType2Arch
+              - Ref: InstanceType
+              - Arch
+      InstanceType:
+        Ref: InstanceType
+      SecurityGroups:
+        - Ref: WebServerSecurityGroup
+      KeyName:
+        Ref: KeyName
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            - - |
+                #!/bin/bash -xe
+              - |
+                yum update aws-cfn-bootstrap
+              - |
+                # Install the files and packages from the metadata
+              - "/opt/aws/bin/cfn-init "
+              - "         --stack "
+              - Ref: AWS::StackName
+              - "         --resource WebServerInstance "
+              - "         --configsets InstallAndRun "
+              - "         --region "
+              - Ref: AWS::Region
+              - "\n"
+              - |
+                # Signal the status from cfn-init
+              - "/opt/aws/bin/cfn-signal -e $? "
+              - "         --stack "
+              - Ref: AWS::StackName
+              - "         --resource WebServerInstance "
+              - "         --region "
+              - Ref: AWS::Region
+              - "\n"
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT5M
+  WebServerSecurityGroup: {}
+Outputs:
+  WebsiteURL: {}

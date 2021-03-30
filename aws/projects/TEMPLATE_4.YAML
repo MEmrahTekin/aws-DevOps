@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: 
+  this templates creates an EC2 instance with a SSH connection. 
+
+Resources:
+
+
+
+  EmrahCFIInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+
+      ImageId: ami-0533f2ba8a1995cf9 
+
+      InstanceType: t2.micro 
+
+      KeyName: Firstkey
+
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+
+          yum install -y
+          yum install httpd -y
+          systemctl status httpd
+          systemctl start httpd
+          chmod -R 777 /var/www/html
+          cd /var/www/html
+          wget https://27d41bfcae37f8c731354031036a26e4ae344d1e@raw.githubusercontent.com/MEmrahTekin/project1/master/index.html
+          wget https://27d41bfcae37f8c731354031036a26e4ae344d1e@raw.githubusercontent.com/MEmrahTekin/project1/master/cat0.jpg
+          wget https://27d41bfcae37f8c731354031036a26e4ae344d1e@raw.githubusercontent.com/MEmrahTekin/project1/master/cat1.jpg
+          wget https://27d41bfcae37f8c731354031036a26e4ae344d1e@raw.githubusercontent.com/MEmrahTekin/project1/master/cat2.jpg
+      
+      SecurityGroupIds: 
+      -  !GetAtt 
+         -  MySecurityGroup
+         -  GroupId
+
+
+      Tags:
+        - Key: Name
+          Value: My-Pretty-Cats
+    
+
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+        GroupDescription: Allow http to client host
+        GroupName: MySecurityGroup
+        SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+Outputs:
+  PublicIp:
+    Description: Server'ss Public IP
+    Value: !GetAtt EmrahCFIInstance.PublicIp
+    Export:
+      Name: !Sub "${AWS::StackName}-PublicIp"
+
+  WebsiteURL:
+    Description: Server'ss Public IP
+    Value: !Join
+      - ''
+      - - "http://"
+        - !GetAtt
+           - EmrahCFIInstance
+           - PublicIp
