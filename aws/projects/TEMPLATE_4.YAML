@@ -3,11 +3,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: 
   this templates creates an EC2 instance with a SSH connection. 
 
-
-  Resources:
-
-
-
+Resources:
   EmrahCFIInstance:
     Type: AWS::EC2::Instance
     Properties:
@@ -35,8 +31,8 @@ Description:
       
       SecurityGroupIds: 
       -  !GetAtt 
-         -  MySecurityGroup
-         -  GroupId
+        -  MySecurityGroup
+        -  GroupId
 
 
       Tags:
