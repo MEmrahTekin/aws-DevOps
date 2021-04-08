@@ -6,7 +6,11 @@ Description:
   EC2 instance with custom security group which allows http connections on port 80 and ssh port 22 from anywhere.
    Kittens Carousel Static website is dowloaded from Public Github repository, then deployed on Apache Web Server.. 
 
-Resources:
+
+  Resources:
+
+
+
   EmrahCFIInstance:
     Type: AWS::EC2::Instance
     Properties:
@@ -34,8 +38,8 @@ Resources:
       
       SecurityGroupIds: 
       -  !GetAtt 
-        -  MySecurityGroup
-        -  GroupId
+         -  MySecurityGroup
+         -  GroupId
 
 
       Tags:
