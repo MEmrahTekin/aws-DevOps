@@ -1,20 +1,54 @@
-# AWS Workshop
+# AWS CLI v2
 
-AWS Workshop contains hands-on trainings and projects.
+This bundle contains a built executable of the AWS CLI v2.
 
-- [List of AWS Hands-on Trainings](./hands-on/README.md)
+## Installation
 
-- [List of AWS Projects](./projects/README.md)
+To install the AWS CLI v2, run the `install` script:
+```
+$ sudo ./install 
+You can now run: /usr/local/bin/aws --version
+```
+This will install the AWS CLI v2 at `/usr/local/bin/aws`.  Assuming
+`/usr/local/bin` is on your `PATH`, you can now run:
+```
+$ aws --version
+```
 
-- [AWS Session Class-notes](./class-notes/README.md)
+
+### Installing without sudo
+
+If you don't have ``sudo`` permissions or want to install the AWS
+CLI v2 only for the current user, run the `install` script with the `-b`
+and `-i` options:
+```
+$ ./install -i ~/.local/aws-cli -b ~/.local/bin
+``` 
+This will install the AWS CLI v2 in `~/.local/aws-cli` and create
+symlinks for `aws` and `aws_completer` in `~/.local/bin`. For more
+information about these options, run the `install` script with `-h`:
+```
+$ ./install -h
+```
+
+### Updating
+
+If you run the `install` script and there is a previously installed version
+of the AWS CLI v2, the script will error out. To update to the version included
+in this bundle, run the `install` script with `--update`:
+```
+$ sudo ./install --update
+```
 
 
-## Naming Convention for Folders 
+### Removing the installation
 
-- Use lower case letters to name the folders.
-
-- The name of the folder should give detailed info about it's contents such as date/session, instructor and title:
-
-    - 2020-06-30-victor-using-package-manager
-    
-    - 2020-07-19-osvaldo-asg-2
+To remove the AWS CLI v2, delete the its installation and symlinks:
+```
+$ sudo rm -rf /usr/local/aws-cli
+$ sudo rm /usr/local/bin/aws
+$ sudo rm /usr/local/bin/aws_completer
+```
+Note if you installed the AWS CLI v2 using the `-b` or `-i` options, you will
+need to remove the installation and the symlinks in the directories you
+specified.
