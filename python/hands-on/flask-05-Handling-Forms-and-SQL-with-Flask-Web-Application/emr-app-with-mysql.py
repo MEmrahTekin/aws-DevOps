@@ -73,7 +73,7 @@ def insert_email(name,email):
     if name == None or email == None:
         response = "Name or Email is EMPTY!!!"
     elif not any(result):
-        cursor.execute(insert)
+        cursor.execute(data)
         response = f"Name= {name} and email = {email} is added to db"
     else:
         response = f"there is a SAME {name} already too"
