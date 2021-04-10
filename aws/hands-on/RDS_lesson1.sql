@@ -1,0 +1,1 @@
+select * from clarusway.salary_Info;
