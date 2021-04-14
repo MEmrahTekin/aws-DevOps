@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  This Cloudformation Template was written for Converting Latin Numbers to Roman Numbers Static Website on EC2. 
+  This website will be deployed on Linux 2 (ami-0742b4e673072066f) EC2 instance with custom security group which allows
+  http connections on port 80 and ssh port 22 from anywhere. this Static website is dowloaded from Public Github repository, 
+  then deployed on Apache Web Server..  
+    
+Parameters:
+  Emrkeypair:
+    Description: Select a keypair 
+    Type: AWS::EC2::KeyPair::KeyName
+
+  EmrVPC:
+    Description: This is default VPC 
+    Type: AWS::EC2::VPC::Id
+
+Mappings:
+  RegionImageMap:
+    us-east-1:
+      AMI: ami-0742b4e673072066f
+    us-east-2:
+      AMI: ami-05d72852800cbf29e
+    us-west-1:
+      AMI: ami-0577b787189839998
+    us-west-2:
+      AMI: ami-0518bb0e75d3619ca
+    eu-west-1:
+      AMI: ami-0ffea00000f287d30
+        
+  
+Resources:
+  EmrahsSecgroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enables SSH and HTTP ports #required
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      VpcId: !Ref EmrVPC
+
+  Emrinstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap 
+        - RegionImageMap
+        - !Ref AWS::Region
+        - AMI
+      InstanceType: t2.micro
+      KeyName: !Ref Emrkeypair
+      SecurityGroupIds:
+        -  !GetAtt 
+          -  EmrahsSecgroup
+          -  GroupId
+      UserData: !Base64 |
+          #!/bin/bash
+
+          yum update -y
+          yum install python3 -y
+          pip3 install flask
+          yum install svn -y
+          svn export https://github.com/MEmrahTekin/aws-DevOps/trunk/aws/projects/Project-001-Roman-Numerals-Converter
+          cd Project-001-Roman-Numerals-Converter/
+          python3 roman.py
+      Tags:
+        - Key: Name
+          Value: !Join 
+            - ''
+            - - 'Web Server of '
+              - !Ref AWS::StackName
+
+  
+Outputs:
+  WebsiteURL:
+    Description: Server'ss Public IP
+    Value: !Join
+      - ''
+      - - "http://"
+        - !GetAtt
+           - Emrinstance
+           - PublicIp
+
