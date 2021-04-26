@@ -1,0 +1,186 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  This is just a  try
+Parameters:
+  KeyName:
+    Description: Select your keypair from list
+    Type: AWS::EC2::KeyPair::KeyName  
+  EmrahsVPC:
+    Description: This is default VPC 
+    Type: AWS::EC2::VPC::Id
+  
+  EmrahSubnets:
+    Description: List of Subnet Ids in list, Please select two of them 
+    Type: List<AWS::EC2::Subnet::Id>  
+
+Resources:
+  EmrLBSecgroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enables SSH and HTTP ports #required
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      VpcId: !Ref EmrahsVPC
+
+
+  EmrECSecgroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enables SSH and HTTP ports #required
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        SourceSecurityGroupId: !GetAtt EmrLBSecgroup.GroupId
+      VpcId: !Ref EmrahsVPC
+   
+  EmrTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 25
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 3
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 3
+      VpcId: !Ref EmrahsVPC
+ 
+  EmrListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions: #required
+        - Type: forward
+          TargetGroupArn: !Ref EmrTargetGroup
+      LoadBalancerArn: !Ref EmrLoadBalancer #required
+      Port: 80
+      Protocol: HTTP
+
+  EmrLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      SecurityGroups:
+        - !GetAtt EmrLBSecgroup.GroupId
+      Subnets: !Ref EmrahSubnets
+      
+      
+
+  EmrTemplate:
+    Type: 'AWS::EC2::LaunchTemplate'
+    Properties:
+     # LaunchTemplateName: !Sub '${AWS::StackName}-launch-template-for-auto-scaling'
+      LaunchTemplateData:
+        InstanceType: t2.micro
+        KeyName: !Ref KeyName 
+        ImageId: ami-0742b4e673072066f
+        UserData: !Base64 |
+          #!/bin/bash
+
+          yum update -y
+          yum install python3 -y
+          pip3 install flask
+          yum install svn -y
+          svn export https://github.com/MEmrahTekin/aws-DevOps/trunk/aws/projects/Project-002-Milliseconds-Converter
+          cd Project-002-Milliseconds-Converter/
+          python3 Conver-milisecond.py
+        SecurityGroupIds:
+          - !Ref EmrECSecgroup
+      
+  
+  Emrpro2ASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: EmrproAutoScaling
+      AvailabilityZones: !GetAZs
+      DesiredCapacity: "2"
+      HealthCheckGracePeriod: 90
+      HealthCheckType: ELB
+      LaunchTemplate:
+        LaunchTemplateId: !Ref EmrTemplate
+        Version: !GetAtt WebServerLaunchTemplate.LatestVersionNumber
+      MaxSize: "3" #required
+      MinSize: "1" #required
+      TargetGroupARNs:
+        - !Ref EmrTargetGroup
+      Tags:
+        - Key: Name
+          Value: !Join 
+            - ''
+            - - 'Web Server of '
+              - !Ref AWS::StackName
+          PropagateAtLaunch: true
+
+  EmrPhoneDb:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: "21"
+      AllowMajorVersionUpgrade: True
+    #  AssociatedRoles:
+    #    - DBInstanceRole
+      AutoMinorVersionUpgrade: true
+      AvailabilityZone: us-east-1d
+      BackupRetentionPeriod: 0
+   #   CACertificateIdentifier: String
+   #   CharacterSetName: String
+   #   CopyTagsToSnapshot: Boolean
+   #   DBClusterIdentifier: String
+      DBInstanceClass: db.t2.micro #required
+    #  DBInstanceIdentifier: String
+      DBName: clarusway_phonebook
+    #  DBParameterGroupName: String
+    #  DBSecurityGroups:
+     #   - String it doesnt been use anymore 
+     # DBSnapshotIdentifier: String
+     # DBSubnetGroupName: String
+     # DeleteAutomatedBackups: Boolean zaten defaultu otomatik siliyor.
+     # DeletionProtection: Boolean defaultu koruma yapmıyor.
+     # Domain: String  Bu ne bilmiyorum.
+     # DomainIAMRoleName: String bu ne bilmiyorum.
+     # EnableCloudwatchLogsExports: bunu kullanmıyoruz log kayıdı için kullanılıyor.
+      #  - String
+     # EnableIAMDatabaseAuthentication: Boolean
+     # EnablePerformanceInsights: Boolean
+      Engine: MYSQL
+      EngineVersion: 8.0.19
+     # Iops: Integer
+     # KmsKeyId: String
+     # LicenseModel: String
+      MasterUserPassword: Ankara_1
+      MasterUsername: admin
+      MaxAllocatedStorage: 22
+      MonitoringInterval: 0
+     # MonitoringRoleArn: String
+      MultiAZ: false
+     # OptionGroupName: String
+     # PerformanceInsightsKMSKeyId: String
+     # PerformanceInsightsRetentionPeriod: Integer
+      Port: "3306"
+     # PreferredBackupWindow: String
+     # PreferredMaintenanceWindow: String
+     # ProcessorFeatures:
+      #  - ProcessorFeature
+     # PromotionTier: Integer
+      PubliclyAccessible: true
+     # SourceDBInstanceIdentifier: String
+     # SourceRegion: String
+     # StorageEncrypted: Boolean
+      StorageType: gp2 
+      Tags:
+       - Key: Name
+         Value: Emrah Tagı
+     # Timezone: String
+     # UseDefaultProcessorFeatures: Boolean
+     # VPCSecurityGroups:
+       # - String
+
+    
+     
+Outputs:
+  AppURL:
+    Description: URL of Call App
+    Value: !Join 
+      - ''
+      - - 'http://'
+        - !GetAtt EmrLoadBalancer.DNSName

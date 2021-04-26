@@ -21,7 +21,7 @@ def result(number):
 def index():
     if request.method== "POST":
         number = request.form.get("number")
-        if number.isdecimal() == False:
+        if number.isdecimal() == False or int(number)==0 :
             return render_template("index.html",not_valid = True, developer_name="EmRaH")
         else:
             return render_template("result.html",milisecond = number, result = result(number), developer_name="EmRaH")
@@ -32,5 +32,5 @@ def index():
 
 
 if __name__ == "__main__":
-    #app.run(debug=True)
-    app.run(host="0.0.0.0",port=80)
+    app.run(debug=True)
+    #app.run(host="0.0.0.0",port=80)

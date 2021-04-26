@@ -1,0 +1,132 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  This is just a  try
+Parameters:
+  KeyName:
+    Description: Select your keypair from list
+    Type: AWS::EC2::KeyPair::KeyName  
+  EmrahsVPC:
+    Description: This is default VPC 
+    Type: AWS::EC2::VPC::Id
+  
+  EmrahSubnets:
+    Description: List of Subnet Ids in list, Please select two of them 
+    Type: List<AWS::EC2::Subnet::Id>  
+
+Resources:
+  EmrLBSecgroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enables SSH and HTTP ports #required
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      VpcId: !Ref EmrahsVPC
+
+
+  EmrECSecgroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enables SSH and HTTP ports #required
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        SourceSecurityGroupId: !GetAtt EmrLBSecgroup.GroupId
+      VpcId: !Ref EmrahsVPC
+   
+  EmrTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 25
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 3
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 3
+      VpcId: !Ref EmrahsVPC
+ 
+  EmrListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions: #required
+        - Type: forward
+          TargetGroupArn: !Ref EmrTargetGroup
+      LoadBalancerArn: !Ref EmrLoadBalancer #required
+      Port: 80
+      Protocol: HTTP
+
+  EmrLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      SecurityGroups:
+        - !GetAtt EmrLBSecgroup.GroupId
+      Subnets: !Ref EmrahSubnets
+      
+      
+
+  EmrTemplate:
+    Type: 'AWS::EC2::LaunchTemplate'
+    Properties:
+     # LaunchTemplateName: !Sub '${AWS::StackName}-launch-template-for-auto-scaling'
+      LaunchTemplateData:
+        InstanceType: t2.micro
+        KeyName: !Ref KeyName 
+        ImageId: ami-0742b4e673072066f
+        UserData: !Base64 |
+          #!/bin/bash
+
+          yum update -y
+          yum install python3 -y
+          pip3 install flask
+          yum install svn -y
+          svn export https://github.com/MEmrahTekin/aws-DevOps/trunk/aws/projects/Project-002-Milliseconds-Converter
+          cd Project-002-Milliseconds-Converter/
+          python3 Conver-milisecond.py
+        SecurityGroupIds:
+          - !Ref EmrECSecgroup
+      
+  
+  Emrpro2ASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: EmrproAutoScaling
+      AvailabilityZones: !GetAZs
+      DesiredCapacity: "2"
+      HealthCheckGracePeriod: 90
+      HealthCheckType: ELB
+      LaunchTemplate:
+        LaunchTemplateId: !Ref EmrTemplate
+        Version: '1'
+      MaxSize: "3" #required
+      MinSize: "1" #required
+      TargetGroupARNs:
+        - !Ref EmrTargetGroup
+      Tags:
+        - Key: Name
+          Value: !Join 
+            - ''
+            - - 'Web Server of '
+              - !Ref AWS::StackName
+          PropagateAtLaunch: true
+
+    
+  EmrahsCPUPolicy:
+    Type: "AWS::AutoScaling::ScalingPolicy"
+    Properties:
+      AutoScalingGroupName: !Ref Emrpro2ASG
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 40.0
+      
+Outputs:
+  AppURL:
+    Description: URL of Call App
+    Value: !Join 
+      - ''
+      - - 'http://'
+        - !GetAtt EmrLoadBalancer.DNSName
