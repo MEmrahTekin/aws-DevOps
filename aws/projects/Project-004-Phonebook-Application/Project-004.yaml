@@ -23,7 +23,7 @@ Resources:
         FromPort: 80
         ToPort: 80
         CidrIp: 0.0.0.0/0
-      VpcId: !Ref EmrahsVPC
+
 
 
   EmrECSecgroup:
@@ -35,12 +35,17 @@ Resources:
         FromPort: 80
         ToPort: 80
         SourceSecurityGroupId: !GetAtt EmrLBSecgroup.GroupId
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+
       VpcId: !Ref EmrahsVPC
    
   EmrTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      HealthCheckIntervalSeconds: 25
+      HealthCheckIntervalSeconds: 100
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 3
       Port: 80
@@ -75,16 +80,25 @@ Resources:
         InstanceType: t2.micro
         KeyName: !Ref KeyName 
         ImageId: ami-0742b4e673072066f
-        UserData: !Base64 |
-          #!/bin/bash
+        UserData:
+          Fn::Base64: !Sub 
+          - |
+            #! /bin/bash
 
-          yum update -y
-          yum install python3 -y
-          pip3 install flask
-          yum install svn -y
-          svn export https://github.com/MEmrahTekin/aws-DevOps/trunk/aws/projects/Project-002-Milliseconds-Converter
-          cd Project-002-Milliseconds-Converter/
-          python3 Conver-milisecond.py
+
+            yum update -y
+            cd /home/ec2-user
+            yum install python3 -y
+            pip3 install flask
+            pip3 install flask_mysql
+            yum install svn -y
+            svn export https://github.com/MEmrahTekin/aws-DevOps/trunk/aws/projects/Project-004-Phonebook-Application
+            PRIVATE_1=${Private1}
+            echo  > ./dbserver.endpoint $PRIVATE_1
+            cd ./Project-004-Phonebook-Application
+            python3 phonebook-app.py
+          - Private1: !GetAtt EmrPhoneDb.Endpoint.Address
+
         SecurityGroupIds:
           - !Ref EmrECSecgroup
       
@@ -92,14 +106,15 @@ Resources:
   Emrpro2ASG:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      AutoScalingGroupName: EmrproAutoScaling
+      #AutoScalingGroupName: EmrproAutoScaling
       AvailabilityZones: !GetAZs
-      DesiredCapacity: "2"
-      HealthCheckGracePeriod: 90
+      Cooldown: 1000
+      DesiredCapacity: 2
+      HealthCheckGracePeriod: 300
       HealthCheckType: ELB
       LaunchTemplate:
         LaunchTemplateId: !Ref EmrTemplate
-        Version: !GetAtt WebServerLaunchTemplate.LatestVersionNumber
+        Version: !GetAtt EmrTemplate.LatestVersionNumber
       MaxSize: "3" #required
       MinSize: "1" #required
       TargetGroupARNs:
@@ -115,7 +130,7 @@ Resources:
   EmrPhoneDb:
     Type: AWS::RDS::DBInstance
     Properties:
-      AllocatedStorage: "21"
+      AllocatedStorage: 21
       AllowMajorVersionUpgrade: True
     #  AssociatedRoles:
     #    - DBInstanceRole
@@ -156,7 +171,7 @@ Resources:
      # OptionGroupName: String
      # PerformanceInsightsKMSKeyId: String
      # PerformanceInsightsRetentionPeriod: Integer
-      Port: "3306"
+      Port: 3306
      # PreferredBackupWindow: String
      # PreferredMaintenanceWindow: String
      # ProcessorFeatures:
