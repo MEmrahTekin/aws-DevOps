@@ -22,6 +22,11 @@ List of hands-on trainings within DevOps as follows;
 
 - [Hands-on Docker-09 : Docker Swarm Networking Operations](./Docker/docker-09-swarm-networking-managing-services-secrets-stacks/)
 
+- [Hands-on Docker-10 : Difference between shell form and exec form, and ENTRYPOINT instruction and CMD instruction](./Docker/docker-10-difference-between-exec-form-shell-form-and-CMD-ENTRYPOINT-instructions)
+
+- [Hands-on Docker-13 : docker logs, top and stats command](./Docker/docker-13-docker-logs-top-and-stats-commands)
+
+
 # Maven
 
 - [Hands-on Maven-01 : Using Maven As a Build Tool](./Maven/maven-01-using-maven-as-a-build-tool/)
@@ -35,9 +40,33 @@ List of hands-on trainings within DevOps as follows;
 
 # Kubernetes
 
+- [Hands-on EKS-01 : Creating and Managing Kubernetes Cluster with AWS EKS](./Kubernetes/eks-01-managing-kubernete-cluster-with-eks/)
+
+- [Hands-on EKS-02 : Dynamic Volume Provisionining and Ingress](./Kubernetes/eks-02-DynamicVolumeProvisionining-and-Ingress/)
+
+- [Hands-on EKS-03 : AWS LoadBalancer Controller (ALB) and Ingress with EKS](./Kubernetes/eks-03-AWS-EKS-ALB-ingress/)
+
 - [Hands-on Kubernetes-01 : Installing Kubernetes on Ubuntu 20.04 running on AWS EC2 Instances](./Kubernetes/kubernetes-01a-installing-on-ec2-linux2/)
 
 - [Hands-on Kubernetes-02 : Kubernetes Basic Operations](./Kubernetes/kubernetes-02-basic-operations/)
+
+- [Hands-on Kubernetes-03 : Kubernetes Networking and Service Discovery](./Kubernetes/kubernetes-03-networking-service-discovery/)
+
+- [Hands-on Kubernetes-04 : Deploying Microservices and Service Level Autoscaling](./Kubernetes/kubernetes-04-microservice-deployment-and-autoscaling/)
+
+- [Hands-on Kubernetes-05 : Managing Secrets and ConfigMaps](./Kubernetes/kubernetes-05-managing-secrets-and-configmaps/)
+
+- [Hands-on Kubernetes-06 : Kubernetes Volumes](./Kubernetes/kubernetes-06-pods-volumes/)
+
+- [Hands-on Kubernetes-07 : Kustomize ](./Kubernetes/kubernetes-07-Kustomize/)
+
+- [Hands-on Kubernetes-07 : Kustomize ](./Kubernetes/kubernetes-07-Kustomize/)
+
+- [Hands-on Kubernetes-10 : Automate Kubernetes Cluster Creation with Terraform and Ansible ](./Kubernetes/kubernetes-10-automate-k8s-cluster-creation-with-terraform-and-ansible/)
+
+- [Hands-on Kubernetes-11 : Kubernetes Backup and Restore ](./Kubernetes/kubernetes-11-etcd-backup/)
+
+- [Hands-on Kubernetes-12 : Kubernetes Pod Scheduling ](./Kubernetes/kubernetes-12-kubernetes-pod-scheduling/)
 
 # Terraform
 
