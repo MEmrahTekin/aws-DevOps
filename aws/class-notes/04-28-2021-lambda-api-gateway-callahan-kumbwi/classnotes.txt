@@ -1,0 +1,24 @@
+AWS Lambda & API Gateway
+4/28/2021
+
+Session-2
+
+Instructor: Callahan/Kumbwi
+
+Session starts at 3pm EST
+
+CORS - Cross Origin Resources Sharing
+
+Break until 6pm EST
+
+Break until 5.05pm EST
+
+
+
+  
+References:
+  - https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html
+  - https://docs.aws.amazon.com/cli/latest/reference/
+  - https://editor.swagger.io
+
+

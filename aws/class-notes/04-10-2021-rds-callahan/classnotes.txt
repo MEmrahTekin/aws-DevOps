@@ -1,0 +1,19 @@
+AWS Databases Session
+Relational Database Service 
+4/10/2021
+
+Instructor: Callahan
+
+Session - 1
+
+Session starts at 10am EST
+
+Break until 11am EST
+
+Break until 12pm EST
+
+
+
+  
+  References:
+  - https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html
