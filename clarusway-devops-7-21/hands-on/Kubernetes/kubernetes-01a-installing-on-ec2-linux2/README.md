@@ -1,3 +1,33 @@
+hatayı çözmek için bunu yap
+https://github.com/kubernetes/kubeadm/issues/1893 ***************************************************************I got the same issue during the installation. The kubelet was not running. in the procedure of kubelete installation you must to configure the docker container (I think they have remove this part in the procedure):
+
+sudo mkdir /etc/docker
+cat <<EOF | sudo tee /etc/docker/daemon.json
+{
+"exec-opts": ["native.cgroupdriver=systemd"],
+"log-driver": "json-file",
+"log-opts": {
+"max-size": "100m"
+},
+"storage-driver": "overlay2"
+}
+EOF
+
+sudo systemctl enable docker
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+
+Check if the kubelet became running:
+sudo systemctl status kubelet
+
+The procedure is in:
+
+https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker
+
+*************************************************************
+
+
+
 # Hands-on Kubernetes-01a : Installing Kubernetes on Ubuntu 20.04 running on AWS EC2 Instances
 
 Purpose of the this hands-on training is to give students the knowledge of how to install and configure Kubernetes on Ubuntu 20.04 EC2 Instances.
